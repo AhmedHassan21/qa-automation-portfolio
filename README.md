@@ -16,6 +16,8 @@ demonstration of production-style test automation practices.
 - **API contract testing** — a second suite exercises a REST API directly through Playwright's
   `request` fixture: status codes, response schemas, resource relationships, the full CRUD
   lifecycle, and response-time checks. No browser involved.
+- **Accessibility scanning** — axe-core runs WCAG 2.0/2.1 AA scans on the core pages and
+  gates CI on critical/serious violations.
 - **CI-ready** — GitHub Actions workflow runs the suite on every push; failures upload the
   Playwright HTML report with traces and screenshots as an artifact.
 
@@ -28,6 +30,7 @@ demonstration of production-style test automation practices.
 | UI | Shopping flow | full purchase end-to-end, checkout validation (missing postal code) |
 | API (`tests/api/posts-api.spec.ts`) | Read contracts | collection schema, single resource, 404 handling, nested routes, response time |
 | API | CRUD lifecycle | create, partial payloads, update, delete |
+| A11y (`tests/a11y.accessibility.spec.ts`) | axe-core scans (WCAG 2.0/2.1 AA) | no critical/serious violations on login, inventory, cart |
 
 The API suite targets [JSONPlaceholder](https://jsonplaceholder.typicode.com), a stable fake REST
 API. One test deliberately pins a quirk of its actual behavior (empty payloads are accepted and
@@ -49,10 +52,11 @@ npm run report                    # open the HTML report
 pages/             Page Object Model classes (login, inventory, cart, checkout)
 tests/             UI test suites + shared test data
 tests/api/         API contract tests (Playwright request fixture)
+tests/a11y.accessibility.spec.ts  axe-core accessibility scans
 .github/workflows  CI pipeline (GitHub Actions)
 ```
 
 ## Roadmap ideas
 
 - Allure reporting for richer historical results
-- Accessibility checks with `@axe-core/playwright`
+
