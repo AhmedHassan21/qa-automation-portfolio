@@ -30,11 +30,18 @@ test.describe('Inventory', () => {
     const inventoryPage = new InventoryPage(page);
     await inventoryPage.expectLoaded();
 
-    await inventoryPage.sortBy('az');
-    const names = await inventoryPage.names();
+    // The default inventory order is already A to Z, so sorting 'az' alone
+    // would pass with a dead control. Sort Z-A first, assert the flip, then
+    // restore A-Z and assert — both passing proves the control works.
+    await inventoryPage.sortBy('za');
+    const namesZA = await inventoryPage.names();
+    const expectedZA = [...namesZA].sort((a, b) => b.localeCompare(a));
+    expect(namesZA).toEqual(expectedZA);
 
-    const expected = [...names].sort((a, b) => a.localeCompare(b));
-    expect(names).toEqual(expected);
+    await inventoryPage.sortBy('az');
+    const namesAZ = await inventoryPage.names();
+    const expectedAZ = [...namesAZ].sort((a, b) => a.localeCompare(b));
+    expect(namesAZ).toEqual(expectedAZ);
   });
 });
 

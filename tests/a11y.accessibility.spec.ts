@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { USERS } from './data';
+import { LoginPage } from '../pages/LoginPage';
+import { InventoryPage } from '../pages/InventoryPage';
+import { CartPage } from '../pages/CartPage';
+
+const BACKPACK = 'Sauce Labs Backpack';
 
 /**
  * Accessibility checks with axe-core on the core saucedemo pages.
@@ -25,10 +30,9 @@ test.describe('Accessibility — critical and serious violations', () => {
   });
 
   test('inventory page has no critical/serious violations', async ({ page }) => {
-    await page.goto('/');
-    await page.getByPlaceholder('Username').fill(USERS.valid.username);
-    await page.getByPlaceholder('Password').fill(USERS.valid.password);
-    await page.getByRole('button', { name: 'Login' }).click();
+    const loginPage = new LoginPage(page);
+    await loginPage.open();
+    await loginPage.loginAs(USERS.valid.username, USERS.valid.password);
     await page.waitForURL(/inventory/);
 
     const violations = await scan(page);
@@ -36,13 +40,14 @@ test.describe('Accessibility — critical and serious violations', () => {
   });
 
   test('cart page has no critical/serious violations', async ({ page }) => {
-    await page.goto('/');
-    await page.getByPlaceholder('Username').fill(USERS.valid.username);
-    await page.getByPlaceholder('Password').fill(USERS.valid.password);
-    await page.getByRole('button', { name: 'Login' }).click();
+    const loginPage = new LoginPage(page);
+    const inventoryPage = new InventoryPage(page);
+    const cartPage = new CartPage(page);
+    await loginPage.open();
+    await loginPage.loginAs(USERS.valid.username, USERS.valid.password);
     await page.waitForURL(/inventory/);
-    await page.getByRole('button', { name: /add to cart/i }).first().click();
-    await page.goto('/cart.html');
+    await inventoryPage.addItemToCart(BACKPACK);
+    await cartPage.open();
 
     const violations = await scan(page);
     expect(violations, JSON.stringify(violations.map((v) => ({ id: v.id, nodes: v.nodes.length })), null, 2)).toHaveLength(0);
